@@ -11,7 +11,7 @@ import RemindersView from './RemindersView'
 import { defaultRemind, useReminders, type RemindCfg } from './reminders'
 import { useStored } from './storage'
 
-export type NavPref = 'auto' | 'top' | 'bottom'
+export type NavPref = 'top' | 'bottom'
 
 export default function App() {
   const today = isoDate(new Date())
@@ -21,7 +21,7 @@ export default function App() {
     const d = new Date()
     return { y: d.getFullYear(), m: d.getMonth() }
   })
-  const [navPref, setNavPref] = useStored<NavPref>('tm.navpos', 'auto')
+  const [navPref, setNavPref] = useStored<NavPref>('tm.navpos.v2', 'bottom')
   const standalone = typeof window !== 'undefined' && (window.matchMedia?.('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true)
   const [remind, setRemind] = useStored<RemindCfg>('tm.remind', defaultRemind)
   useReminders(items, remind)
@@ -131,13 +131,14 @@ export default function App() {
     )
   }
 
-  // no navegador a barra do próprio Safari/Chrome cobre a parte de baixo, então as abas vão para o topo;
-  // no app instalado (sem barra do navegador) ficam embaixo. A aba Conta permite escolher.
-  const navTop = navPref === 'top' || (navPref === 'auto' && !standalone)
+  // padrão: abas embaixo (a aba Conta permite trocar para o topo)
+  const navTop = navPref === 'top'
+  // no Safari do iPhone aberto como site (não instalado), a barra flutuante do navegador cobre o pé da tela
+  const iosBrowserBar = !standalone && /iPhone|iPad|iPod/.test(navigator.userAgent)
   const navEl = (
     <nav
       className={`shrink-0 bg-slate-900/95 backdrop-blur ${navTop ? 'border-b border-slate-800' : 'safe-bottom border-t border-slate-800'}`}
-      style={navTop ? { paddingTop: 'env(safe-area-inset-top)' } : undefined}
+      style={navTop ? { paddingTop: 'env(safe-area-inset-top)' } : iosBrowserBar ? { paddingBottom: 'calc(3.5rem + env(safe-area-inset-bottom))' } : undefined}
     >
       <div className="mx-auto flex max-w-2xl">
         {([
@@ -163,7 +164,7 @@ export default function App() {
       </div>
     </nav>
   )
-  const browserBarSpace = navTop && !standalone // a barra flutuante do navegador cobre o pé da tela
+  const browserBarSpace = navTop && iosBrowserBar
 
   return (
     <div className="relative mx-auto flex h-dvh w-full max-w-2xl flex-col overflow-x-hidden">
@@ -338,7 +339,7 @@ export default function App() {
           onClick={() => setSheet({ item: null, start: suggestStart() })}
           aria-label="Adicionar atividade"
           className="absolute right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-sky-500 text-3xl leading-none text-slate-900 shadow-lg shadow-black/40 active:scale-95"
-          style={{ bottom: navTop ? (browserBarSpace ? 'calc(5.5rem + env(safe-area-inset-bottom))' : 'calc(1.25rem + env(safe-area-inset-bottom))') : 'calc(4.25rem + env(safe-area-inset-bottom))' }}
+          style={{ bottom: navTop ? (browserBarSpace ? 'calc(5.5rem + env(safe-area-inset-bottom))' : 'calc(1.25rem + env(safe-area-inset-bottom))') : iosBrowserBar ? 'calc(7.75rem + env(safe-area-inset-bottom))' : 'calc(4.25rem + env(safe-area-inset-bottom))' }}
         >
           +
         </button>

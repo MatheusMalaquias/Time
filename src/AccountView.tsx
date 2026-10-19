@@ -109,9 +109,9 @@ export default function AccountView({ session, ready, recovery, clearRecovery, s
         {navPref && setNavPref && (
           <section className={card}>
             <h2 className="font-semibold">Barra de abas</h2>
-            <p className="text-sm text-slate-400">Automática: no topo quando aberto no navegador e embaixo no app instalado.</p>
+            <p className="text-sm text-slate-400">Escolha onde ficam as abas: embaixo (padrão) ou no topo.</p>
             <div className="flex gap-2" role="radiogroup" aria-label="Posição da barra de abas">
-              {([['auto', 'Automática'], ['top', 'Topo'], ['bottom', 'Embaixo']] as const).map(([v, label]) => (
+              {([['bottom', 'Embaixo'], ['top', 'Topo']] as const).map(([v, label]) => (
                 <button
                   key={v}
                   role="radio"
