@@ -22,7 +22,6 @@ export default function App() {
     return { y: d.getFullYear(), m: d.getMonth() }
   })
   const [navPref, setNavPref] = useStored<NavPref>('tm.navpos.v2', 'bottom')
-  const standalone = typeof window !== 'undefined' && (window.matchMedia?.('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true)
   const [remind, setRemind] = useStored<RemindCfg>('tm.remind', defaultRemind)
   useReminders(items, remind)
   const auth = useSession()
@@ -133,12 +132,10 @@ export default function App() {
 
   // padrão: abas embaixo (a aba Conta permite trocar para o topo)
   const navTop = navPref === 'top'
-  // no Safari do iPhone aberto como site (não instalado), a barra flutuante do navegador cobre o pé da tela
-  const iosBrowserBar = !standalone && /iPhone|iPad|iPod/.test(navigator.userAgent)
   const navEl = (
     <nav
       className={`shrink-0 bg-slate-900/95 backdrop-blur ${navTop ? 'border-b border-slate-800' : 'safe-bottom border-t border-slate-800'}`}
-      style={navTop ? { paddingTop: 'env(safe-area-inset-top)' } : iosBrowserBar ? { paddingBottom: 'calc(3.5rem + env(safe-area-inset-bottom))' } : undefined}
+      style={navTop ? { paddingTop: 'env(safe-area-inset-top)' } : undefined}
     >
       <div className="mx-auto flex max-w-2xl">
         {([
@@ -164,7 +161,6 @@ export default function App() {
       </div>
     </nav>
   )
-  const browserBarSpace = navTop && iosBrowserBar
 
   return (
     <div className="relative mx-auto flex h-dvh w-full max-w-2xl flex-col overflow-x-hidden">
@@ -175,7 +171,6 @@ export default function App() {
         className={`fade-in min-h-0 min-w-0 flex-1 px-4 ${view === 'dia' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto overscroll-contain pb-6'}`}
         style={{
           paddingTop: navTop ? '0.75rem' : 'max(1rem, env(safe-area-inset-top))',
-          paddingBottom: browserBarSpace ? 'calc(4.5rem + env(safe-area-inset-bottom))' : undefined,
         }}
       >
       {(view === 'avisos' || view === 'conta') && <h1 className="mb-4 text-2xl font-bold">{view === 'avisos' ? 'Avisos' : 'Conta'}</h1>}
@@ -339,7 +334,7 @@ export default function App() {
           onClick={() => setSheet({ item: null, start: suggestStart() })}
           aria-label="Adicionar atividade"
           className="absolute right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-sky-500 text-3xl leading-none text-slate-900 shadow-lg shadow-black/40 active:scale-95"
-          style={{ bottom: navTop ? (browserBarSpace ? 'calc(5.5rem + env(safe-area-inset-bottom))' : 'calc(1.25rem + env(safe-area-inset-bottom))') : iosBrowserBar ? 'calc(7.75rem + env(safe-area-inset-bottom))' : 'calc(4.25rem + env(safe-area-inset-bottom))' }}
+          style={{ bottom: navTop ? 'calc(1.25rem + env(safe-area-inset-bottom))' : 'calc(4.25rem + env(safe-area-inset-bottom))' }}
         >
           +
         </button>
