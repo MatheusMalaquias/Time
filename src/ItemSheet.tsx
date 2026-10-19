@@ -47,9 +47,9 @@ export default function ItemSheet({ date, item, presetStart, onSave, onRemove, o
   }
 
   return (
-    <div className="fixed inset-0 z-30 flex items-end bg-black/60 sm:items-center" onClick={onClose}>
+    <div className="fade-in fixed inset-0 z-30 flex items-end bg-black/60 sm:items-center" onClick={onClose}>
       <form
-        className="mx-auto max-h-[92dvh] w-full max-w-md space-y-4 overflow-y-auto rounded-t-2xl bg-slate-800 p-5 sm:rounded-2xl"
+        className="sheet-in mx-auto max-h-[92dvh] w-full max-w-md space-y-4 overflow-y-auto rounded-t-2xl bg-slate-800 p-5 sm:rounded-2xl"
         style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
         onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => {
@@ -57,6 +57,7 @@ export default function ItemSheet({ date, item, presetStart, onSave, onRemove, o
           if (valid) save()
         }}
       >
+        <div className="mx-auto -mt-2 h-1.5 w-10 rounded-full bg-slate-600 sm:hidden" />
         <h2 className="font-semibold">{item ? 'Editar' : 'Novo'} · {parseDate(date).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</h2>
 
         <input

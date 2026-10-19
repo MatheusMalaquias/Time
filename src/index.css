@@ -20,3 +20,20 @@ body {
 @media (max-width: 640px) {
   input, select, textarea { font-size: 16px !important; }
 }
+
+/* sensação de app: feedback ao toque e transições curtas */
+button { transition: transform 80ms ease, background-color 150ms ease, opacity 150ms ease; }
+button:active:not(:disabled) { transform: scale(0.96); }
+
+@keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes sheet-in { from { transform: translateY(24px); opacity: 0 } to { transform: none; opacity: 1 } }
+.fade-in { animation: fade-in 160ms ease-out; }
+.sheet-in { animation: sheet-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in, .sheet-in { animation: none; }
+  button { transition: none; }
+}
+
+/* campos de seleção de texto só onde faz sentido; evita seleção acidental ao arrastar */
+button, nav { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }

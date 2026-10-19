@@ -67,6 +67,7 @@ export default function DayTimeline({ date, items, isToday, onToggle, onEdit, on
     const block = (ev: TouchEvent) => ev.preventDefault() // impede a página de rolar durante o arrasto
     const begin = () => {
       dragging = true
+      navigator.vibrate?.(12)
       el.setPointerCapture?.(pointerId)
       window.addEventListener('touchmove', block, { passive: false })
       setDrag({ id: item.id, start: origStart })
@@ -107,7 +108,7 @@ export default function DayTimeline({ date, items, isToday, onToggle, onEdit, on
   }
 
   return (
-    <div ref={scroller} className="max-h-[calc(100dvh-16rem)] min-h-80 overflow-y-auto overscroll-contain rounded-xl bg-slate-800/40">
+    <div ref={scroller} className="h-full min-h-0 overflow-y-auto overscroll-contain rounded-xl bg-slate-800/40">
       <div
         className="relative cursor-pointer select-none"
         style={{ height: 24 * HOUR_H }}
@@ -133,6 +134,7 @@ export default function DayTimeline({ date, items, isToday, onToggle, onEdit, on
           return (
             <div
               key={item.id}
+              data-event
               onClick={(e) => e.stopPropagation()}
               onPointerDown={(e) => startPress(e, original)}
               className={`absolute flex gap-2 overflow-hidden rounded-md border-l-4 px-2 py-1 text-sm ${

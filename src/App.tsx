@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { colorFor, DAY_NAMES, fmt, isoDate, itemsOn, MONTHS, monthGrid, parseDate, starterItems, type Item } from './calendar'
 import Dashboard from './Dashboard'
 import DayTimeline from './DayTimeline'
@@ -45,7 +45,8 @@ export default function App() {
     showDate(isoDate(d))
   }
 
-  const toggleDone = (id: string) =>
+  const toggleDone = (id: string) => {
+    navigator.vibrate?.(8)
     setItems((list) =>
       list.map((it) =>
         it.id === id
@@ -53,6 +54,7 @@ export default function App() {
           : it
       )
     )
+  }
 
   const save = (item: Item) => {
     setItems((list) => (list.some((i) => i.id === item.id) ? list.map((i) => (i.id === item.id ? item : i)) : [...list, item]))
@@ -82,6 +84,26 @@ export default function App() {
   const dayItems = itemsOn(items, selected)
   const doneCount = dayItems.filter((i) => i.doneOn.includes(selected)).length
   const untimed = dayItems.filter((i) => i.start === undefined)
+
+  // deslizar para o lado troca de dia (ignora gestos que começam em uma atividade)
+  const swipe = useRef<{ x: number; y: number; ok: boolean } | null>(null)
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0]
+    swipe.current = { x: t.clientX, y: t.clientY, ok: !(e.target as HTMLElement).closest('[data-event]') }
+  }
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const s0 = swipe.current
+    swipe.current = null
+    if (!s0?.ok) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - s0.x
+    const dy = t.clientY - s0.y
+    if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 2) shiftDay(dx < 0 ? 1 : -1)
+  }
+  const suggestStart = () => {
+    const n = new Date()
+    return selected === today ? Math.min(23 * 60, Math.ceil((n.getHours() * 60 + n.getMinutes() + 1) / 30) * 30) : 9 * 60
+  }
   const navBtn = 'flex h-11 w-11 items-center justify-center rounded-lg text-xl text-slate-300 hover:bg-slate-800'
   const pill = 'rounded-lg bg-slate-800 px-4 py-2.5 text-sm text-sky-400'
 
@@ -106,7 +128,13 @@ export default function App() {
   }
 
   return (
-    <div className="safe-top mx-auto min-h-dvh max-w-2xl px-4 pb-28 pt-5">
+    <div className="relative mx-auto flex h-dvh max-w-2xl flex-col">
+      <main
+        key={view}
+        className={`fade-in min-h-0 flex-1 px-4 ${view === 'dia' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto overscroll-contain pb-6'}`}
+        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
+      >
+      {(view === 'avisos' || view === 'conta') && <h1 className="mb-4 text-2xl font-bold">{view === 'avisos' ? 'Avisos' : 'Conta'}</h1>}
       {view === 'painel' ? (
         <Dashboard
           items={items}
@@ -178,8 +206,8 @@ export default function App() {
           <p className="mt-3 text-center text-xs text-slate-500">Toque em um dia para abrir.</p>
         </>
       ) : (
-        <>
-          <header className="mb-5 flex items-center justify-between gap-2">
+        <div className="flex min-h-0 flex-1 flex-col" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+          <header className="mb-3 flex shrink-0 items-center justify-between gap-2">
             <div className="flex items-center">
               <button onClick={() => shiftDay(-1)} aria-label="Dia anterior" className={navBtn}>‹</button>
               <div className="min-w-44 text-center">
@@ -197,9 +225,9 @@ export default function App() {
             </div>
           </header>
 
-          <section>
+          <section className="flex min-h-0 flex-1 flex-col">
             {dayItems.length > 0 && (
-              <div className="mb-3 text-sm text-slate-400">{doneCount}/{dayItems.length} feitos</div>
+              <div className="mb-2 shrink-0 text-sm text-slate-400">{doneCount}/{dayItems.length} feitos</div>
             )}
 
             {items.length === 0 && (
@@ -217,39 +245,58 @@ export default function App() {
             )}
 
             {untimed.length > 0 && (
-              <ul className="mb-3 space-y-1.5">
+              <div className="-mx-4 mb-2 flex shrink-0 gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
                 {untimed.map((it) => {
                   const done = it.doneOn.includes(selected)
+                  const c = colorFor(it)
                   return (
-                    <li key={it.id} className="flex items-center gap-3 rounded-lg border-l-4 bg-slate-800 px-3 py-2" style={{ borderColor: colorFor(it) }}>
+                    <div
+                      key={it.id}
+                      className="flex shrink-0 items-center gap-2 rounded-full bg-slate-800 py-1 pl-1.5 pr-3 text-sm"
+                      style={{ boxShadow: `inset 0 0 0 1.5px ${c}88` }}
+                    >
                       <button
                         onClick={() => toggleDone(it.id)}
                         aria-label={done ? 'Desmarcar' : 'Marcar como feito'}
-                        className={`h-5 w-5 shrink-0 rounded-full border-2 text-xs leading-none ${
-                          done ? 'border-emerald-400 bg-emerald-400 text-slate-900' : 'border-slate-500'
-                        }`}
+                        className="relative flex h-6 w-6 items-center justify-center rounded-full border-2 text-xs leading-none text-slate-900 before:absolute before:-inset-2 before:content-['']"
+                        style={{ borderColor: c, background: done ? c : 'transparent' }}
                       >
                         {done ? '✓' : ''}
                       </button>
-                      <span className={`flex-1 text-sm ${done ? 'line-through opacity-50' : ''}`}>{it.title}</span>
-                      <button onClick={() => setSheet({ item: it })} aria-label="Editar" className="px-1 text-slate-400">⋯</button>
-                    </li>
+                      <button onClick={() => setSheet({ item: it })} className={`py-1.5 ${done ? 'line-through opacity-50' : ''}`}>
+                        {it.title}
+                      </button>
+                    </div>
                   )
                 })}
-              </ul>
+              </div>
             )}
 
-            <DayTimeline
-              date={selected}
-              items={dayItems}
-              isToday={selected === today}
-              onToggle={toggleDone}
-              onEdit={(item) => setSheet({ item: items.find((i) => i.id === item.id) ?? item })}
-              onMove={moveItem}
-              onAdd={(start) => setSheet({ item: null, start })}
-            />
+            <div className="min-h-0 flex-1 pb-3">
+              <DayTimeline
+                date={selected}
+                items={dayItems}
+                isToday={selected === today}
+                onToggle={toggleDone}
+                onEdit={(item) => setSheet({ item: items.find((i) => i.id === item.id) ?? item })}
+                onMove={moveItem}
+                onAdd={(start) => setSheet({ item: null, start })}
+              />
+            </div>
           </section>
-        </>
+        </div>
+      )}
+      </main>
+
+      {view === 'dia' && !sheet && (
+        <button
+          onClick={() => setSheet({ item: null, start: suggestStart() })}
+          aria-label="Adicionar atividade"
+          className="absolute right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-sky-500 text-3xl leading-none text-slate-900 shadow-lg shadow-black/40 active:scale-95"
+          style={{ bottom: 'calc(4.25rem + env(safe-area-inset-bottom))' }}
+        >
+          +
+        </button>
       )}
 
       {sheet && (
@@ -264,7 +311,7 @@ export default function App() {
         />
       )}
 
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-slate-800 bg-slate-900/95 backdrop-blur">
+      <nav className="safe-bottom shrink-0 border-t border-slate-800 bg-slate-900/95 backdrop-blur">
         <div className="mx-auto flex max-w-2xl">
           {([
             ['painel', 'Painel', IconPanel],
@@ -277,10 +324,11 @@ export default function App() {
               key={v}
               onClick={() => setView(v)}
               aria-current={view === v ? 'page' : undefined}
-              className={`flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] ${
+              className={`relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] ${
                 view === v ? 'text-sky-400' : 'text-slate-400'
               }`}
             >
+              {view === v && <span className="absolute top-0 h-0.5 w-8 rounded-full bg-sky-400" />}
               <Icon />
               {label}
             </button>
