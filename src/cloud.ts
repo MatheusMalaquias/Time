@@ -7,7 +7,9 @@ const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
 
 /** Sem as variáveis de ambiente o app funciona só neste aparelho, como antes. */
-export const supabase = url && key ? createClient(url, key) : null
+// storageKey próprio: outros apps em matheusmalaquias.github.io que usem o mesmo projeto do Supabase
+// guardam o login no mesmo domínio e, sem isso, o TimeMind herdaria a sessão deles.
+export const supabase = url && key ? createClient(url, key, { auth: { storageKey: 'timemind-auth' } }) : null
 export const cloudConfigured = supabase !== null
 
 export function useSession() {
