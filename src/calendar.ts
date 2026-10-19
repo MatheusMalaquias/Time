@@ -67,53 +67,6 @@ export function monthGrid(year: number, month: number): (string | null)[] {
   return cells
 }
 
-/** Rotina inicial baseada no que você descreveu; tudo editável depois. */
-export function starterItems(today: string): Item[] {
-  const colorOf: Record<string, string> = {
-    Academia: PALETTE[1],
-    'Estudo de idioma': PALETTE[6],
-    Treinamento: PALETTE[0],
-    Almoço: PALETTE[3],
-    'Estudo pessoal': PALETTE[2],
-    'Aula de inglês': PALETTE[4],
-    'Reunião da Igreja': PALETTE[5],
-    'Reunião da noite': PALETTE[5],
-    Leitura: PALETTE[7],
-  }
-  const mk = (title: string, days: number[], start?: number, end?: number, color = colorOf[title]): Item => ({
-    id: uid(),
-    title,
-    days,
-    start,
-    end,
-    from: today,
-    color,
-    doneOn: [],
-    skip: [],
-  })
-  const h = (hh: number, mm = 0) => hh * 60 + mm
-  const week = [1, 2, 3, 4, 5]
-  return [
-    mk('Academia', [1, 2, 3, 4, 5, 6], h(6, 30), h(7, 30)),
-    mk('Academia', [0], h(17), h(18)),
-    mk('Estudo de idioma', week, h(7, 30), h(8, 30)),
-    mk('Estudo de idioma', [6], h(9), h(10)),
-    mk('Estudo de idioma', [0], h(18), h(18, 30)),
-    mk('Treinamento', week, h(9), h(18)),
-    mk('Almoço', week, h(12), h(13)),
-    mk('Estudo pessoal', week, h(18), h(19)),
-    mk('Estudo pessoal', [6], h(10), h(11)),
-    mk('Estudo pessoal', [0], h(14, 30), h(15)),
-    mk('Aula de inglês', [1, 3], h(19), h(20)),
-    mk('Aula de inglês', [0], h(15), h(17)),
-    mk('Reunião da Igreja', [0], h(7), h(12)),
-    mk('Reunião da noite', [0], h(21), h(22)),
-    mk('Leitura', week, h(21, 30), h(22, 30)),
-    mk('Leitura', [6], h(11), h(12)),
-    mk('Leitura', [0], h(22), h(22, 30)),
-  ]
-}
-
 /** Paleta categórica (versão para fundo escuro), na ordem fixa. */
 export const PALETTE = ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767']
 

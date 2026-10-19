@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { itemsOn, monthGrid, starterItems } from './calendar'
+import { itemsOn, monthGrid } from './calendar'
 
 const base = { doneOn: [], skip: [] }
 
@@ -46,12 +46,6 @@ describe('monthGrid', () => {
     expect(g.length % 7).toBe(0)
     expect(g.indexOf('2026-10-01')).toBe(4)
     expect(g.filter(Boolean)).toHaveLength(31)
-  })
-})
-
-describe('starterItems', () => {
-  it('traz a rotina inicial', () => {
-    expect(starterItems('2026-10-19').map((i) => i.title)).toContain('Academia')
   })
 })
 

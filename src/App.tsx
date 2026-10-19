@@ -1,12 +1,13 @@
 import { useRef, useState } from 'react'
-import { colorFor, DAY_NAMES, fmt, isoDate, itemsOn, MONTHS, monthGrid, parseDate, starterItems, type Item } from './calendar'
+import { colorFor, DAY_NAMES, fmt, isoDate, itemsOn, MONTHS, monthGrid, parseDate, type Item } from './calendar'
 import Dashboard from './Dashboard'
 import DayTimeline from './DayTimeline'
 import ItemSheet from './ItemSheet'
 import AccountView from './AccountView'
 import { IconBell, IconDay, IconMonth, IconPanel, IconUser } from './Icons'
 import { Brand } from './Logo'
-import { cloudConfigured, useSession, useSync } from './cloud'
+import { clearLocalData, cloudConfigured, useSession, useSync } from './cloud'
+import Welcome from './Welcome'
 import RemindersView from './RemindersView'
 import { defaultRemind, useReminders, type RemindCfg } from './reminders'
 import { useStored } from './storage'
@@ -187,6 +188,11 @@ export default function App() {
         <AccountView
           navPref={navPref}
           setNavPref={setNavPref}
+          onDeleted={() => {
+            clearLocalData()
+            setItems([])
+            setView('painel')
+          }}
           session={auth.session}
           ready={auth.ready}
           recovery={auth.recovery}
@@ -271,15 +277,7 @@ export default function App() {
               <div className="mb-2 shrink-0 text-sm text-slate-400">{doneCount}/{dayItems.length} feitos</div>
             )}
 
-            {items.length === 0 && (
-              <div className="mb-3 rounded-lg border border-dashed border-slate-600 p-4 text-sm text-slate-300">
-                Seu calendário está vazio.{' '}
-                <button onClick={() => setItems(starterItems(today))} className="text-sky-400 underline">
-                  Começar com a minha rotina
-                </button>{' '}
-                (treinamento, aulas, academia, estudos...) e editar depois.
-              </div>
-            )}
+            {items.length === 0 && <Welcome today={today} onPick={(list) => setItems(list)} onAdd={() => setSheet({ item: null, start: suggestStart() })} />}
 
             {items.length > 0 && dayItems.length === 0 && (
               <p className="mb-3 text-sm text-slate-400">Nada marcado para este dia.</p>

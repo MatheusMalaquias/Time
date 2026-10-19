@@ -27,7 +27,14 @@ export default function Dashboard({ items, today, onOpenDay }: Props) {
   const t = parseDate(today)
 
   if (items.length === 0)
-    return <p className="rounded-lg border border-dashed border-slate-600 p-4 text-sm text-slate-300">Adicione atividades na aba Dia para ver o seu progresso aqui.</p>
+    return (
+      <div className="space-y-3 rounded-lg border border-dashed border-slate-600 p-4 text-sm text-slate-300">
+        <p>Sua agenda está vazia. Quando você adicionar atividades, o seu progresso do dia, da semana e do mês aparece aqui.</p>
+        <button onClick={() => onOpenDay(today)} className="rounded-lg bg-sky-500 px-4 py-3 font-medium text-slate-900">
+          Montar minha rotina
+        </button>
+      </div>
+    )
 
   return (
     <div className="space-y-6">

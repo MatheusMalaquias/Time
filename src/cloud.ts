@@ -1,6 +1,7 @@
 import { createClient, type Session } from '@supabase/supabase-js'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Item } from './calendar'
+import { isRecoveryUrl, ownerAction } from './account'
 import { mergeRemote, reconcileMeta, type MetaMap } from './sync'
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
@@ -15,7 +16,8 @@ export const cloudConfigured = supabase !== null
 export function useSession() {
   const [session, setSession] = useState<Session | null>(null)
   const [ready, setReady] = useState(!supabase)
-  const [recovery, setRecovery] = useState(false)
+  // o link do e-mail traz type=recovery; guardamos isso já na carga, caso o evento chegue antes da escuta
+  const [recovery, setRecovery] = useState(() => isRecoveryUrl(location.hash, location.search))
 
   useEffect(() => {
     if (!supabase) return
@@ -26,6 +28,7 @@ export function useSession() {
     const { data } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s)
       if (event === 'PASSWORD_RECOVERY') setRecovery(true)
+      if (event === 'SIGNED_OUT') setRecovery(false)
     })
     return () => data.subscription.unsubscribe()
   }, [])
@@ -40,6 +43,18 @@ export interface SyncStatus {
 }
 
 const META_KEY = 'tm.sync.meta'
+const OWNER_KEY = 'tm.owner'
+export const ITEMS_KEY = 'tm.cal.v1'
+
+/** Apaga tudo o que o app guarda neste aparelho sobre a agenda (usado ao excluir a conta). */
+export function clearLocalData() {
+  try {
+    for (const k of [ITEMS_KEY, META_KEY, OWNER_KEY]) localStorage.removeItem(k)
+  } catch {
+    /* sem armazenamento */
+  }
+}
+
 const loadMeta = (): MetaMap => {
   try {
     return JSON.parse(localStorage.getItem(META_KEY) ?? '{}')
@@ -52,13 +67,43 @@ const loadMeta = (): MetaMap => {
  * Local primeiro: o app sempre lê e grava no aparelho (funciona offline) e sincroniza com o
  * Supabase em segundo plano. Por atividade, vence a mudança mais recente.
  */
-export function useSync(items: Item[], setItems: (items: Item[]) => void, userId?: string) {
+export function useSync(items: Item[], setItems: (items: Item[]) => void, loginId?: string) {
+  const [claimed, setClaimed] = useState<string>()
+  // só sincroniza depois de conferir de quem são os dados deste aparelho
+  const userId = loginId && claimed === loginId ? loginId : undefined
   const [status, setStatus] = useState<SyncStatus>({ state: 'idle' })
   const itemsRef = useRef(items)
   itemsRef.current = items
   const metaRef = useRef<MetaMap>(loadMeta())
   const running = useRef(false)
   const again = useRef(false)
+
+  // outra pessoa entrou neste aparelho: descarta os dados locais da anterior, para não irem para a conta dela
+  useEffect(() => {
+    if (!loginId) return
+    let stored: string | null = null
+    try {
+      stored = localStorage.getItem(OWNER_KEY)
+    } catch {
+      /* sem armazenamento */
+    }
+    if (ownerAction(stored, loginId) === 'reset') {
+      metaRef.current = {}
+      itemsRef.current = []
+      setItems([])
+      try {
+        localStorage.removeItem(META_KEY)
+      } catch {
+        /* sem armazenamento */
+      }
+    }
+    try {
+      localStorage.setItem(OWNER_KEY, loginId)
+    } catch {
+      /* sem armazenamento */
+    }
+    setClaimed(loginId)
+  }, [loginId, setItems])
 
   const saveMeta = () => {
     try {
@@ -113,12 +158,13 @@ export function useSync(items: Item[], setItems: (items: Item[]) => void, userId
 
   // registra o que mudou e, logado, sincroniza pouco depois da última edição
   useEffect(() => {
+    if (loginId && !userId) return // ainda conferindo o dono dos dados
     metaRef.current = reconcileMeta(items, metaRef.current, Date.now())
     saveMeta()
     if (!userId) return
     const t = setTimeout(() => void sync(), 1500)
     return () => clearTimeout(t)
-  }, [items, userId, sync])
+  }, [items, loginId, userId, sync])
 
   // ao entrar, ao voltar para o app, ao reconectar e a cada minuto
   useEffect(() => {
