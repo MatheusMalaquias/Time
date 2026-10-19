@@ -107,7 +107,7 @@ export default function DayTimeline({ date, items, isToday, onToggle, onEdit, on
   }
 
   return (
-    <div ref={scroller} className="max-h-[70vh] overflow-y-auto rounded-xl bg-slate-800/40">
+    <div ref={scroller} className="max-h-[calc(100dvh-16rem)] min-h-80 overflow-y-auto overscroll-contain rounded-xl bg-slate-800/40">
       <div
         className="relative cursor-pointer select-none"
         style={{ height: 24 * HOUR_H }}
@@ -153,7 +153,7 @@ export default function DayTimeline({ date, items, isToday, onToggle, onEdit, on
                   onToggle(item.id)
                 }}
                 aria-label={done ? 'Desmarcar' : 'Marcar como feito'}
-                className="mt-0.5 h-4 w-4 shrink-0 rounded-full border-2 text-[10px] leading-none text-slate-900"
+                className="relative mt-0.5 h-4 w-4 shrink-0 rounded-full border-2 text-[10px] leading-none text-slate-900 before:absolute before:-inset-3 before:content-['']"
                 style={{ borderColor: colorFor(item), background: done ? colorFor(item) : 'transparent' }}
               >
                 {done ? '✓' : ''}

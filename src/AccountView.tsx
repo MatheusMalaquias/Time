@@ -13,7 +13,7 @@ interface Props {
   itemCount: number
 }
 
-const field = 'w-full rounded bg-slate-700 px-3 py-2 text-sm'
+const field = 'w-full rounded-lg bg-slate-700 px-3 py-3 text-sm'
 const card = 'space-y-3 rounded-xl bg-slate-800 p-4'
 
 export default function AccountView({ session, ready, recovery, clearRecovery, status, sync, itemCount }: Props) {
@@ -76,7 +76,7 @@ export default function AccountView({ session, ready, recovery, clearRecovery, s
       <section className={card}>
         <h2 className="font-semibold">Nova senha</h2>
         <input type="password" autoComplete="new-password" placeholder="Nova senha (mínimo 8 caracteres)" value={password} onChange={(e) => setPassword(e.target.value)} className={field} />
-        <button onClick={newPassword} disabled={busy} className="rounded bg-sky-500 px-4 py-2 text-sm font-medium text-slate-900 disabled:opacity-40">
+        <button onClick={newPassword} disabled={busy} className="rounded-lg bg-sky-500 px-5 py-3 text-sm font-medium text-slate-900 disabled:opacity-40">
           Salvar senha
         </button>
         <Message msg={msg} />
@@ -96,8 +96,8 @@ export default function AccountView({ session, ready, recovery, clearRecovery, s
             {status.state === 'error' && <span className="text-amber-300">Não sincronizou: {status.error}. Seus dados continuam salvos neste aparelho.</span>}
           </p>
           <div className="flex gap-3">
-            <button onClick={sync} className="rounded bg-sky-500 px-3 py-2 text-sm font-medium text-slate-900">Sincronizar agora</button>
-            <button onClick={() => run(async () => void (await client.auth.signOut()))} disabled={busy} className="rounded bg-slate-700 px-3 py-2 text-sm">
+            <button onClick={sync} className="rounded-lg bg-sky-500 px-4 py-3 text-sm font-medium text-slate-900">Sincronizar agora</button>
+            <button onClick={() => run(async () => void (await client.auth.signOut()))} disabled={busy} className="rounded-lg bg-slate-700 px-4 py-3 text-sm">
               Sair
             </button>
           </div>
@@ -126,13 +126,13 @@ export default function AccountView({ session, ready, recovery, clearRecovery, s
         <input type="email" autoComplete="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} className={field} required />
         <input type="password" autoComplete="current-password" placeholder="Senha" value={password} onChange={(e) => setPassword(e.target.value)} className={field} required />
         <div className="flex flex-wrap items-center gap-3">
-          <button type="submit" disabled={busy} className="rounded bg-sky-500 px-4 py-2 text-sm font-medium text-slate-900 disabled:opacity-40">
+          <button type="submit" disabled={busy} className="rounded-lg bg-sky-500 px-5 py-3 text-sm font-medium text-slate-900 disabled:opacity-40">
             Entrar
           </button>
-          <button type="button" onClick={signUp} disabled={busy} className="rounded bg-slate-700 px-4 py-2 text-sm disabled:opacity-40">
+          <button type="button" onClick={signUp} disabled={busy} className="rounded-lg bg-slate-700 px-5 py-3 text-sm disabled:opacity-40">
             Criar conta
           </button>
-          <button type="button" onClick={reset} disabled={busy} className="text-sm text-slate-400 underline">
+          <button type="button" onClick={reset} disabled={busy} className="py-2 text-sm text-slate-400 underline">
             Esqueci a senha
           </button>
         </div>

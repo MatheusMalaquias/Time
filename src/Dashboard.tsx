@@ -1,3 +1,4 @@
+import { Logo } from './Logo'
 import { DAY_NAMES, fmt, itemsOn, MONTHS, parseDate, colorFor, type Item } from './calendar'
 import { activityStats, dayCount, monthDates, pct, rangeCount, weekDates, type Count } from './stats'
 
@@ -30,6 +31,14 @@ export default function Dashboard({ items, today, onOpenDay }: Props) {
 
   return (
     <div className="space-y-6">
+      <header className="flex items-center gap-3">
+        <Logo size={44} />
+        <div>
+          <h1 className="text-2xl font-bold leading-none tracking-tight">Time</h1>
+          <p className="mt-1 text-sm text-slate-400">Make time for what matters.</p>
+        </div>
+      </header>
+
       <div className="grid grid-cols-3 gap-3">
         <Tile label="Hoje" c={todayC} />
         <Tile label="Semana" c={weekC} />

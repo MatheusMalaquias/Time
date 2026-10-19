@@ -10,7 +10,7 @@ interface Props {
   onClose: () => void
 }
 
-const field = 'rounded bg-slate-700 px-2 py-2 text-sm'
+const field = 'rounded-lg bg-slate-700 px-3 py-2.5 text-sm'
 
 export default function ItemSheet({ date, item, presetStart, onSave, onRemove, onClose }: Props) {
   const [title, setTitle] = useState(item?.title ?? '')
@@ -47,9 +47,10 @@ export default function ItemSheet({ date, item, presetStart, onSave, onRemove, o
   }
 
   return (
-    <div className="fixed inset-0 z-10 flex items-end bg-black/60 sm:items-center" onClick={onClose}>
+    <div className="fixed inset-0 z-30 flex items-end bg-black/60 sm:items-center" onClick={onClose}>
       <form
-        className="mx-auto w-full max-w-md space-y-4 rounded-t-2xl bg-slate-800 p-5 sm:rounded-2xl"
+        className="mx-auto max-h-[92dvh] w-full max-w-md space-y-4 overflow-y-auto rounded-t-2xl bg-slate-800 p-5 sm:rounded-2xl"
+        style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
         onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => {
           e.preventDefault()
@@ -66,7 +67,7 @@ export default function ItemSheet({ date, item, presetStart, onSave, onRemove, o
           className={`${field} w-full`}
         />
 
-        <div className="flex items-center gap-2 text-sm text-slate-300">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
           <input type="time" value={start === undefined ? '' : fmt(start)} onChange={(e) => setStart(parseTime(e.target.value))} className={field} />
           <span>até</span>
           <input type="time" value={end === undefined ? '' : fmt(end)} onChange={(e) => setEnd(parseTime(e.target.value))} className={field} />
@@ -79,14 +80,14 @@ export default function ItemSheet({ date, item, presetStart, onSave, onRemove, o
 
         <div>
           <div className="mb-1 text-xs text-slate-400">Cor</div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {PALETTE.map((c) => (
               <button
                 type="button"
                 key={c}
                 onClick={() => setColor(c)}
                 aria-label={`Cor ${c}`}
-                className={`h-7 w-7 rounded-full ${(color ?? colorFor({ title })) === c ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-800' : ''}`}
+                className={`h-8 w-8 rounded-full ${(color ?? colorFor({ title })) === c ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-800' : ''}`}
                 style={{ background: c }}
               />
             ))}
@@ -108,7 +109,7 @@ export default function ItemSheet({ date, item, presetStart, onSave, onRemove, o
                 type="button"
                 key={n}
                 onClick={() => setDays(days.includes(i) ? days.filter((d) => d !== i) : [...days, i].sort())}
-                className={`flex-1 rounded py-1.5 text-xs ${days.includes(i) ? 'bg-sky-500 text-slate-900' : 'bg-slate-700 text-slate-300'}`}
+                className={`flex-1 rounded py-2.5 text-xs ${days.includes(i) ? 'bg-sky-500 text-slate-900' : 'bg-slate-700 text-slate-300'}`}
               >
                 {n}
               </button>
@@ -118,16 +119,16 @@ export default function ItemSheet({ date, item, presetStart, onSave, onRemove, o
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <button type="submit" disabled={!valid} className="rounded bg-sky-500 px-4 py-2 text-sm font-medium text-slate-900 disabled:opacity-40">
+          <button type="submit" disabled={!valid} className="rounded-lg bg-sky-500 px-5 py-3 text-sm font-medium text-slate-900 disabled:opacity-40">
             Salvar
           </button>
           {item && recurring && (
-            <button type="button" onClick={() => onRemove(item, 'day')} className="rounded bg-rose-500/20 px-3 py-2 text-sm text-rose-300">
+            <button type="button" onClick={() => onRemove(item, 'day')} className="rounded-lg bg-rose-500/20 px-3 py-3 text-sm text-rose-300">
               Remover só hoje
             </button>
           )}
           {item && (
-            <button type="button" onClick={() => onRemove(item, 'all')} className="rounded bg-rose-500/20 px-3 py-2 text-sm text-rose-300">
+            <button type="button" onClick={() => onRemove(item, 'all')} className="rounded-lg bg-rose-500/20 px-3 py-3 text-sm text-rose-300">
               {recurring ? 'Remover de todos os dias' : 'Remover'}
             </button>
           )}

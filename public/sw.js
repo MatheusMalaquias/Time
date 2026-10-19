@@ -1,6 +1,6 @@
-const CACHE = 'timemind-v1'
+const CACHE = 'time-v2'
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './manifest.webmanifest', './icon.svg'])))
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './manifest.webmanifest', './icon.svg', './icon-192.png'])))
   self.skipWaiting()
 })
 self.addEventListener('activate', (e) => {

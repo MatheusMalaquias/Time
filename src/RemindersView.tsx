@@ -25,7 +25,7 @@ export default function RemindersView({ items, today, cfg, setCfg }: Props) {
   }
 
   const test = async () => {
-    const ok = await notify('TimeMind', 'Se você viu isto, os lembretes funcionam neste aparelho.', 'teste')
+    const ok = await notify('Time', 'Se você viu isto, os lembretes funcionam neste aparelho.', 'teste')
     setMsg(ok ? 'Teste enviado.' : 'Não foi possível enviar. Verifique a permissão do navegador.')
   }
 
@@ -53,14 +53,14 @@ export default function RemindersView({ items, today, cfg, setCfg }: Props) {
 
         <div className="flex flex-wrap items-center gap-3">
           {cfg.enabled && perm === 'granted' ? (
-            <button onClick={() => setCfg({ ...cfg, enabled: false })} className="rounded bg-slate-700 px-3 py-2 text-sm">
+            <button onClick={() => setCfg({ ...cfg, enabled: false })} className="rounded-lg bg-slate-700 px-4 py-3 text-sm">
               ✓ Ativados · desligar
             </button>
           ) : (
             <button
               onClick={enable}
               disabled={perm === 'unsupported' || perm === 'denied'}
-              className="rounded bg-sky-500 px-3 py-2 text-sm font-medium text-slate-900 disabled:opacity-40"
+              className="rounded-lg bg-sky-500 px-4 py-3 text-sm font-medium text-slate-900 disabled:opacity-40"
             >
               Ativar avisos
             </button>
@@ -70,7 +70,7 @@ export default function RemindersView({ items, today, cfg, setCfg }: Props) {
             <select
               value={cfg.lead}
               onChange={(e) => setCfg({ ...cfg, lead: Number(e.target.value) })}
-              className="rounded bg-slate-700 px-2 py-1.5 text-sm"
+              className="rounded-lg bg-slate-700 px-3 py-2.5 text-sm"
             >
               {LEADS.map((m) => (
                 <option key={m} value={m}>
@@ -79,7 +79,7 @@ export default function RemindersView({ items, today, cfg, setCfg }: Props) {
               ))}
             </select>
           </label>
-          <button onClick={test} disabled={perm !== 'granted'} className="text-sm text-sky-400 underline disabled:opacity-40">
+          <button onClick={test} disabled={perm !== 'granted'} className="py-2 text-sm text-sky-400 underline disabled:opacity-40">
             Enviar teste
           </button>
         </div>
@@ -94,7 +94,7 @@ export default function RemindersView({ items, today, cfg, setCfg }: Props) {
         <button
           onClick={() => downloadIcs(buildIcs(items, { lead: cfg.lead, today }))}
           disabled={timed === 0}
-          className="rounded bg-sky-500 px-3 py-2 text-sm font-medium text-slate-900 disabled:opacity-40"
+          className="rounded-lg bg-sky-500 px-4 py-3 text-sm font-medium text-slate-900 disabled:opacity-40"
         >
           Baixar calendário (.ics)
         </button>

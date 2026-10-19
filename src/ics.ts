@@ -50,7 +50,7 @@ function alarm(title: string, lead: number): string[] {
 export function buildIcs(items: Item[], opts: { lead: number; today: string; now?: Date }): string {
   const now = opts.now ?? new Date()
   const stamp = `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`
-  const out: string[] = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//TimeMind//PT-BR', 'CALSCALE:GREGORIAN', 'X-WR-CALNAME:TimeMind']
+  const out: string[] = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Time//PT-BR', 'CALSCALE:GREGORIAN', 'X-WR-CALNAME:Time']
 
   const event = (uid: string, title: string, lines: string[], timed: boolean) => {
     out.push('BEGIN:VEVENT', `UID:${uid}@timemind`, `DTSTAMP:${stamp}`, `SUMMARY:${esc(title)}`, ...lines)

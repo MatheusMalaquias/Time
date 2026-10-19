@@ -4,6 +4,8 @@ import Dashboard from './Dashboard'
 import DayTimeline from './DayTimeline'
 import ItemSheet from './ItemSheet'
 import AccountView from './AccountView'
+import { IconBell, IconDay, IconMonth, IconPanel, IconUser } from './Icons'
+import { Brand } from './Logo'
 import { cloudConfigured, useSession, useSync } from './cloud'
 import RemindersView from './RemindersView'
 import { defaultRemind, useReminders, type RemindCfg } from './reminders'
@@ -80,15 +82,16 @@ export default function App() {
   const dayItems = itemsOn(items, selected)
   const doneCount = dayItems.filter((i) => i.doneOn.includes(selected)).length
   const untimed = dayItems.filter((i) => i.start === undefined)
-  const navBtn = 'rounded px-3 py-1 text-lg text-slate-300 hover:bg-slate-800'
-  const pill = 'rounded bg-slate-800 px-3 py-1.5 text-sm text-sky-400'
+  const navBtn = 'flex h-11 w-11 items-center justify-center rounded-lg text-xl text-slate-300 hover:bg-slate-800'
+  const pill = 'rounded-lg bg-slate-800 px-4 py-2.5 text-sm text-sky-400'
 
   // com o Supabase configurado, é preciso entrar para usar o app
   if (cloudConfigured && (!auth.ready || !auth.session || auth.recovery)) {
     return (
-      <div className="mx-auto min-h-screen max-w-md px-4 pt-12">
-        <h1 className="mb-1 text-2xl font-semibold">TimeMind</h1>
-        <p className="mb-6 text-sm text-slate-400">Entre para ver a sua agenda neste aparelho.</p>
+      <div className="mx-auto min-h-dvh max-w-md px-4 pb-10" style={{ paddingTop: 'max(2.5rem, env(safe-area-inset-top))' }}>
+        <div className="mb-8">
+          <Brand size={72} center />
+        </div>
         <AccountView
           session={auth.session}
           ready={auth.ready}
@@ -103,19 +106,7 @@ export default function App() {
   }
 
   return (
-    <div className="mx-auto min-h-screen max-w-2xl px-4 pb-10 pt-6">
-      <nav className="mb-5 flex gap-1 rounded-lg bg-slate-800 p-1 text-sm">
-        {([['painel', 'Painel'], ['dia', 'Dia'], ['mes', 'Mês'], ['avisos', 'Avisos'], ['conta', 'Conta']] as const).map(([v, label]) => (
-          <button
-            key={v}
-            onClick={() => setView(v)}
-            className={`flex-1 rounded-md py-1.5 ${view === v ? 'bg-slate-600 font-medium text-white' : 'text-slate-400'}`}
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
-
+    <div className="safe-top mx-auto min-h-dvh max-w-2xl px-4 pb-28 pt-5">
       {view === 'painel' ? (
         <Dashboard
           items={items}
@@ -272,6 +263,30 @@ export default function App() {
           onClose={() => setSheet(null)}
         />
       )}
+
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-slate-800 bg-slate-900/95 backdrop-blur">
+        <div className="mx-auto flex max-w-2xl">
+          {([
+            ['painel', 'Painel', IconPanel],
+            ['dia', 'Dia', IconDay],
+            ['mes', 'Mês', IconMonth],
+            ['avisos', 'Avisos', IconBell],
+            ['conta', 'Conta', IconUser],
+          ] as const).map(([v, label, Icon]) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              aria-current={view === v ? 'page' : undefined}
+              className={`flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] ${
+                view === v ? 'text-sky-400' : 'text-slate-400'
+              }`}
+            >
+              <Icon />
+              {label}
+            </button>
+          ))}
+        </div>
+      </nav>
     </div>
   )
 }

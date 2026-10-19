@@ -2,4 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-body { @apply bg-slate-900 text-slate-100 antialiased; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  @apply bg-slate-900 text-slate-100 antialiased;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; /* tira o atraso do toque duplo */
+}
+
+/* áreas seguras (notch e barra inferior do iPhone) */
+.safe-top { padding-top: max(1.25rem, env(safe-area-inset-top)); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+/* o iPhone dá zoom ao focar campos menores que 16px */
+@media (max-width: 640px) {
+  input, select, textarea { font-size: 16px !important; }
+}
