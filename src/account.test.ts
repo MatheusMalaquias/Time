@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canDelete, feedbackHref, isRecoveryUrl, ownerAction } from './account'
+import { canDelete, isRecoveryUrl, ownerAction } from './account'
 import { TEMPLATES, templateItems } from './templates'
 import { itemsOn } from './calendar'
 
@@ -17,19 +17,6 @@ describe('isRecoveryUrl', () => {
   it('ignora outros links', () => {
     expect(isRecoveryUrl('#access_token=x&type=signup', '')).toBe(false)
     expect(isRecoveryUrl('', '')).toBe(false)
-  })
-})
-
-describe('feedbackHref', () => {
-  it('sem destino não mostra o botão', () => {
-    expect(feedbackHref(undefined)).toBeNull()
-    expect(feedbackHref('  ')).toBeNull()
-  })
-  it('aceita https e e-mail, recusa o resto', () => {
-    expect(feedbackHref('https://exemplo.com/form')).toBe('https://exemplo.com/form')
-    expect(feedbackHref('oi@exemplo.com')).toMatch(/^mailto:oi@exemplo\.com\?subject=/)
-    expect(feedbackHref('javascript:alert(1)')).toBeNull()
-    expect(feedbackHref('http://inseguro.com')).toBeNull()
   })
 })
 

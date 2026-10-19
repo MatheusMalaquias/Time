@@ -1,7 +1,7 @@
 import type { Session } from '@supabase/supabase-js'
 import { useState } from 'react'
 import { cloudConfigured, supabase, type SyncStatus } from './cloud'
-import { canDelete, DELETE_CONFIRM_WORD, feedbackHref } from './account'
+import { canDelete, DELETE_CONFIRM_WORD } from './account'
 import { fmt } from './calendar'
 import type { NavPref } from './App'
 
@@ -16,13 +16,14 @@ interface Props {
   navPref?: NavPref
   setNavPref?: (p: NavPref) => void
   onDeleted?: () => void
+  openFeedback?: () => void
+  unreadFeedback?: number
 }
 
 const field = 'w-full rounded-lg bg-slate-700 px-3 py-3 text-sm'
 const card = 'space-y-3 rounded-xl bg-slate-800 p-4'
-const feedback = feedbackHref(import.meta.env.VITE_FEEDBACK_URL as string | undefined)
 
-export default function AccountView({ session, ready, recovery, clearRecovery, status, sync, itemCount, navPref, setNavPref, onDeleted }: Props) {
+export default function AccountView({ session, ready, recovery, clearRecovery, status, sync, itemCount, navPref, setNavPref, onDeleted, openFeedback, unreadFeedback = 0 }: Props) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -155,14 +156,19 @@ export default function AccountView({ session, ready, recovery, clearRecovery, s
           <h2 className="font-semibold">Seus dados</h2>
           <Privacy />
         </section>
-        {feedback && (
-          <section className={card}>
-            <h2 className="font-semibold">Sugestões</h2>
-            <p className="text-sm text-slate-400">Achou algo ruim ou tem uma ideia? Conte para a gente.</p>
-            <a href={feedback} target="_blank" rel="noopener noreferrer" className="inline-block rounded-lg bg-slate-700 px-4 py-3 text-sm">
-              Enviar sugestão
-            </a>
-          </section>
+        {openFeedback && (
+          <button onClick={openFeedback} className={`${card} flex w-full items-center justify-between text-left`}>
+            <span>
+              <span className="block font-semibold">Feedback</span>
+              <span className="block text-sm text-slate-400">Achou algo ruim ou tem uma ideia? Conte para a gente.</span>
+            </span>
+            <span className="flex shrink-0 items-center gap-2">
+              {unreadFeedback > 0 && (
+                <span aria-label={`${unreadFeedback} não lidas`} className="min-w-6 rounded-full bg-sky-500 px-2 py-0.5 text-center text-xs font-semibold text-slate-900">{unreadFeedback}</span>
+              )}
+              <span aria-hidden className="text-xl text-slate-400">›</span>
+            </span>
+          </button>
         )}
         <section className={card}>
           <h2 className="font-semibold">Excluir minha conta e meus dados</h2>

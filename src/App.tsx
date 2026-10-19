@@ -8,6 +8,8 @@ import { IconBell, IconDay, IconMonth, IconPanel, IconUser } from './Icons'
 import { Brand } from './Logo'
 import { clearLocalData, cloudConfigured, useSession, useSync } from './cloud'
 import Welcome from './Welcome'
+import FeedbackView from './FeedbackView'
+import { useFeedbackAdmin } from './feedback'
 import RemindersView from './RemindersView'
 import { defaultRemind, useReminders, type RemindCfg } from './reminders'
 import { useStored } from './storage'
@@ -27,7 +29,8 @@ export default function App() {
   useReminders(items, remind)
   const auth = useSession()
   const cloud = useSync(items, setItems, auth.session?.user.id)
-  const [view, setView] = useState<'painel' | 'dia' | 'mes' | 'avisos' | 'conta'>('painel')
+  const [view, setView] = useState<'painel' | 'dia' | 'mes' | 'avisos' | 'conta' | 'feedback'>('painel')
+  const fb = useFeedbackAdmin(auth.session?.user.id)
   const [sheet, setSheet] = useState<{ item: Item | null; start?: number } | null>(null)
 
   const move = (delta: number) => {
@@ -149,12 +152,12 @@ export default function App() {
           <button
             key={v}
             onClick={() => setView(v)}
-            aria-current={view === v ? 'page' : undefined}
+            aria-current={view === v || (v === 'conta' && view === 'feedback') ? 'page' : undefined}
             className={`relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] ${
-              view === v ? 'text-sky-400' : 'text-slate-400'
+              view === v || (v === 'conta' && view === 'feedback') ? 'text-sky-400' : 'text-slate-400'
             }`}
           >
-            {view === v && <span className={`absolute h-0.5 w-8 rounded-full bg-sky-400 ${navTop ? 'bottom-0' : 'top-0'}`} />}
+            {(view === v || (v === 'conta' && view === 'feedback')) && <span className={`absolute h-0.5 w-8 rounded-full bg-sky-400 ${navTop ? 'bottom-0' : 'top-0'}`} />}
             <Icon />
             {label}
           </button>
@@ -184,8 +187,12 @@ export default function App() {
             setView('dia')
           }}
         />
+      ) : view === 'feedback' ? (
+        <FeedbackView isAdmin={fb.isAdmin} onBack={() => setView('conta')} onChanged={fb.refresh} />
       ) : view === 'conta' ? (
         <AccountView
+          openFeedback={() => setView('feedback')}
+          unreadFeedback={fb.isAdmin ? fb.unread : 0}
           navPref={navPref}
           setNavPref={setNavPref}
           onDeleted={() => {

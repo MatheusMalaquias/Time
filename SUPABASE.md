@@ -28,6 +28,25 @@ O app tem o botão "Excluir minha conta e meus dados" (aba Conta). Ele chama uma
 Sem esse passo o botão mostra um erro e nada é apagado. A função só apaga a conta de quem está logado
 (`auth.uid()`); não é preciso (nem se deve) usar a chave `service_role`.
 
+## 2.2. Feedback (tela Feedback, aba Conta)
+Qualquer pessoa logada envia sugestões; só você lê. Ordem de execução dos SQLs, todos no **SQL Editor**:
+1. `supabase/schema.sql` (tabela `items`)
+2. `supabase/delete_account.sql` (função de excluir conta)
+3. `supabase/feedback.sql` (tabelas `feedback` e `app_admins`, políticas e limite de 5 envios por pessoa por hora)
+
+**Como virar admin** (para ver a parte "Recebidos"): crie sua conta no app, depois rode no SQL Editor, trocando o e-mail:
+```sql
+insert into public.app_admins (user_id)
+select id from auth.users where email = 'seu-email@exemplo.com'
+on conflict do nothing;
+```
+Saia e entre de novo no app (ou recarregue). A tela Feedback ganha as partes "Enviar" e "Recebidos", e o cartão
+Feedback da aba Conta mostra o contador de não lidas. Para deixar de ser admin: `delete from public.app_admins where user_id = '...'`.
+Ninguém altera `app_admins` pelo app; só pelo SQL Editor.
+
+Como conferir: com uma conta que não é admin, envie uma sugestão; em **Table Editor → feedback** a linha aparece, e no app
+essa conta não vê "Recebidos". Mande 6 seguidas: a sexta deve falhar com o aviso de limite.
+
 ## 3. Ajustes de autenticação (Authentication no painel)
 - **Sign In / Providers → Email**: por padrão exige confirmar o e-mail (veja o checklist abaixo).
 - **URL Configuration** (obrigatório para "Esqueci a senha" e para o link de confirmação):
@@ -56,12 +75,16 @@ Sem esse passo o botão mostra um erro e nada é apagado. A função só apaga a
   Revise também os textos dos e-mails em *Authentication → Emails → Templates*. A senha SMTP fica só no painel
   do Supabase, nunca no código.
 - [ ] **Função `delete_my_account` criada** (passo 2.1) e testada.
-- [ ] **Destino das sugestões** (opcional): defina a variável `VITE_FEEDBACK_URL` (URL https ou e-mail) no `.env`
-  e em *Settings → Secrets and variables → Actions → Variables*. Vazia, o botão "Enviar sugestão" não aparece.
+- [ ] **Feedback** (`supabase/feedback.sql`) criado e você cadastrado em `app_admins` (passo 2.2).
 - [ ] **Privacidade e LGPD**: o aviso de privacidade (criação de conta e aba Conta) e a exclusão de conta e dados
   ajudam a cumprir a LGPD (transparência e direito de eliminação), mas não substituem uma política de privacidade
   completa nem orientação jurídica. O aviso diz a verdade: os dados ficam no Supabase sem criptografia de ponta a
   ponta, cada pessoa só vê os próprios (RLS), e você, como dono, tem acesso técnico pelo painel e se comprometeu a não usá-lo.
+  **Feedback anônimo por padrão:** o app envia só o texto (e a versão do app). Não mostra nome nem e-mail de quem
+  escreveu, e a tela Recebidos nunca exibe o autor. Mas a linha guarda o `user_id` internamente (necessário para o
+  limite contra spam e para apagar tudo junto com a conta), então você tecnicamente consegue ligar uma mensagem a uma
+  conta pelo painel; o compromisso é não fazer isso. Quem quiser resposta escreve um contato no texto. O aviso na tela
+  de envio diz exatamente isso ("sem nome e sem e-mail, só o texto"); ajuste-o se mudar a regra.
 - [ ] Backups e limites do plano gratuito do Supabase (projetos inativos podem ser pausados).
 
 ## Vários usuários no mesmo aparelho
