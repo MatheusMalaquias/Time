@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js'
 import { useState } from 'react'
 import { cloudConfigured, supabase, type SyncStatus } from './cloud'
 import { fmt } from './calendar'
+import type { NavPref } from './App'
 
 interface Props {
   session: Session | null
@@ -11,12 +12,14 @@ interface Props {
   status: SyncStatus
   sync: () => void
   itemCount: number
+  navPref?: NavPref
+  setNavPref?: (p: NavPref) => void
 }
 
 const field = 'w-full rounded-lg bg-slate-700 px-3 py-3 text-sm'
 const card = 'space-y-3 rounded-xl bg-slate-800 p-4'
 
-export default function AccountView({ session, ready, recovery, clearRecovery, status, sync, itemCount }: Props) {
+export default function AccountView({ session, ready, recovery, clearRecovery, status, sync, itemCount, navPref, setNavPref }: Props) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -103,6 +106,25 @@ export default function AccountView({ session, ready, recovery, clearRecovery, s
           </div>
           <Message msg={msg} />
         </section>
+        {navPref && setNavPref && (
+          <section className={card}>
+            <h2 className="font-semibold">Barra de abas</h2>
+            <p className="text-sm text-slate-400">Automática: no topo quando aberto no navegador e embaixo no app instalado.</p>
+            <div className="flex gap-2" role="radiogroup" aria-label="Posição da barra de abas">
+              {([['auto', 'Automática'], ['top', 'Topo'], ['bottom', 'Embaixo']] as const).map(([v, label]) => (
+                <button
+                  key={v}
+                  role="radio"
+                  aria-checked={navPref === v}
+                  onClick={() => setNavPref(v)}
+                  className={`flex-1 rounded-lg py-3 text-sm ${navPref === v ? 'bg-sky-500 font-medium text-slate-900' : 'bg-slate-700 text-slate-200'}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
         <p className="text-xs text-slate-500">
           O app guarda uma cópia neste aparelho e sincroniza em segundo plano, então funciona sem internet. Se a mesma atividade for mudada em dois aparelhos ao mesmo tempo, vale a última mudança.
         </p>

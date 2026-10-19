@@ -11,7 +11,7 @@ body {
   overflow-x: hidden; /* a tela nunca rola de lado */
   overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation; /* tira o atraso do toque duplo */
+  touch-action: pan-x pan-y; /* sem zoom por pinça ou toque duplo: a tela fica sempre no tamanho certo */
 }
 
 /* áreas seguras (notch e barra inferior do iPhone) */

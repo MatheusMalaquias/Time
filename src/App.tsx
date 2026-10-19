@@ -11,6 +11,8 @@ import RemindersView from './RemindersView'
 import { defaultRemind, useReminders, type RemindCfg } from './reminders'
 import { useStored } from './storage'
 
+export type NavPref = 'auto' | 'top' | 'bottom'
+
 export default function App() {
   const today = isoDate(new Date())
   const [items, setItems] = useStored<Item[]>('tm.cal.v1', [])
@@ -19,6 +21,8 @@ export default function App() {
     const d = new Date()
     return { y: d.getFullYear(), m: d.getMonth() }
   })
+  const [navPref, setNavPref] = useStored<NavPref>('tm.navpos', 'auto')
+  const standalone = typeof window !== 'undefined' && (window.matchMedia?.('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true)
   const [remind, setRemind] = useStored<RemindCfg>('tm.remind', defaultRemind)
   useReminders(items, remind)
   const auth = useSession()
@@ -127,12 +131,51 @@ export default function App() {
     )
   }
 
+  // no navegador a barra do próprio Safari/Chrome cobre a parte de baixo, então as abas vão para o topo;
+  // no app instalado (sem barra do navegador) ficam embaixo. A aba Conta permite escolher.
+  const navTop = navPref === 'top' || (navPref === 'auto' && !standalone)
+  const navEl = (
+    <nav
+      className={`shrink-0 bg-slate-900/95 backdrop-blur ${navTop ? 'border-b border-slate-800' : 'safe-bottom border-t border-slate-800'}`}
+      style={navTop ? { paddingTop: 'env(safe-area-inset-top)' } : undefined}
+    >
+      <div className="mx-auto flex max-w-2xl">
+        {([
+          ['painel', 'Painel', IconPanel],
+          ['dia', 'Dia', IconDay],
+          ['mes', 'Mês', IconMonth],
+          ['avisos', 'Avisos', IconBell],
+          ['conta', 'Conta', IconUser],
+        ] as const).map(([v, label, Icon]) => (
+          <button
+            key={v}
+            onClick={() => setView(v)}
+            aria-current={view === v ? 'page' : undefined}
+            className={`relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] ${
+              view === v ? 'text-sky-400' : 'text-slate-400'
+            }`}
+          >
+            {view === v && <span className={`absolute h-0.5 w-8 rounded-full bg-sky-400 ${navTop ? 'bottom-0' : 'top-0'}`} />}
+            <Icon />
+            {label}
+          </button>
+        ))}
+      </div>
+    </nav>
+  )
+  const browserBarSpace = navTop && !standalone // a barra flutuante do navegador cobre o pé da tela
+
   return (
     <div className="relative mx-auto flex h-dvh w-full max-w-2xl flex-col overflow-x-hidden">
+      {navTop && navEl}
+
       <main
         key={view}
         className={`fade-in min-h-0 min-w-0 flex-1 px-4 ${view === 'dia' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto overscroll-contain pb-6'}`}
-        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
+        style={{
+          paddingTop: navTop ? '0.75rem' : 'max(1rem, env(safe-area-inset-top))',
+          paddingBottom: browserBarSpace ? 'calc(4.5rem + env(safe-area-inset-bottom))' : undefined,
+        }}
       >
       {(view === 'avisos' || view === 'conta') && <h1 className="mb-4 text-2xl font-bold">{view === 'avisos' ? 'Avisos' : 'Conta'}</h1>}
       {view === 'painel' ? (
@@ -146,6 +189,8 @@ export default function App() {
         />
       ) : view === 'conta' ? (
         <AccountView
+          navPref={navPref}
+          setNavPref={setNavPref}
           session={auth.session}
           ready={auth.ready}
           recovery={auth.recovery}
@@ -293,7 +338,7 @@ export default function App() {
           onClick={() => setSheet({ item: null, start: suggestStart() })}
           aria-label="Adicionar atividade"
           className="absolute right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-sky-500 text-3xl leading-none text-slate-900 shadow-lg shadow-black/40 active:scale-95"
-          style={{ bottom: 'calc(4.25rem + env(safe-area-inset-bottom))' }}
+          style={{ bottom: navTop ? (browserBarSpace ? 'calc(5.5rem + env(safe-area-inset-bottom))' : 'calc(1.25rem + env(safe-area-inset-bottom))') : 'calc(4.25rem + env(safe-area-inset-bottom))' }}
         >
           +
         </button>
@@ -311,30 +356,7 @@ export default function App() {
         />
       )}
 
-      <nav className="safe-bottom shrink-0 border-t border-slate-800 bg-slate-900/95 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl">
-          {([
-            ['painel', 'Painel', IconPanel],
-            ['dia', 'Dia', IconDay],
-            ['mes', 'Mês', IconMonth],
-            ['avisos', 'Avisos', IconBell],
-            ['conta', 'Conta', IconUser],
-          ] as const).map(([v, label, Icon]) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              aria-current={view === v ? 'page' : undefined}
-              className={`relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] ${
-                view === v ? 'text-sky-400' : 'text-slate-400'
-              }`}
-            >
-              {view === v && <span className="absolute top-0 h-0.5 w-8 rounded-full bg-sky-400" />}
-              <Icon />
-              {label}
-            </button>
-          ))}
-        </div>
-      </nav>
+      {!navTop && navEl}
     </div>
   )
 }
