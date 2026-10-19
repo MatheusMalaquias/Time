@@ -4,7 +4,7 @@ import Dashboard from './Dashboard'
 import DayTimeline from './DayTimeline'
 import ItemSheet from './ItemSheet'
 import AccountView from './AccountView'
-import { IconBell, IconDay, IconMonth, IconPanel, IconUser } from './Icons'
+import { IconBell, IconChat, IconDay, IconMonth, IconPanel, IconUser } from './Icons'
 import { Brand } from './Logo'
 import { clearLocalData, cloudConfigured, useSession, useSync } from './cloud'
 import Welcome from './Welcome'
@@ -147,18 +147,27 @@ export default function App() {
           ['dia', 'Dia', IconDay],
           ['mes', 'Mês', IconMonth],
           ['avisos', 'Avisos', IconBell],
+          // o feedback usa o Supabase, então só existe quando a sincronização está configurada
+          ...(cloudConfigured ? [['feedback', 'Feedback', IconChat] as const] : []),
           ['conta', 'Conta', IconUser],
         ] as const).map(([v, label, Icon]) => (
           <button
             key={v}
             onClick={() => setView(v)}
-            aria-current={view === v || (v === 'conta' && view === 'feedback') ? 'page' : undefined}
+            aria-current={view === v ? 'page' : undefined}
             className={`relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] ${
-              view === v || (v === 'conta' && view === 'feedback') ? 'text-sky-400' : 'text-slate-400'
+              view === v ? 'text-sky-400' : 'text-slate-400'
             }`}
           >
-            {(view === v || (v === 'conta' && view === 'feedback')) && <span className={`absolute h-0.5 w-8 rounded-full bg-sky-400 ${navTop ? 'bottom-0' : 'top-0'}`} />}
-            <Icon />
+            {view === v && <span className={`absolute h-0.5 w-8 rounded-full bg-sky-400 ${navTop ? 'bottom-0' : 'top-0'}`} />}
+            <span className="relative">
+              <Icon />
+              {v === 'feedback' && fb.isAdmin && fb.unread > 0 && (
+                <span aria-label={`${fb.unread} não lidas`} className="absolute -right-2.5 -top-1.5 min-w-4 rounded-full bg-sky-500 px-1 text-center text-[10px] font-semibold leading-4 text-slate-900">
+                  {fb.unread}
+                </span>
+              )}
+            </span>
             {label}
           </button>
         ))}
@@ -188,11 +197,9 @@ export default function App() {
           }}
         />
       ) : view === 'feedback' ? (
-        <FeedbackView isAdmin={fb.isAdmin} onBack={() => setView('conta')} onChanged={fb.refresh} />
+        <FeedbackView isAdmin={fb.isAdmin} onChanged={fb.refresh} />
       ) : view === 'conta' ? (
         <AccountView
-          openFeedback={() => setView('feedback')}
-          unreadFeedback={fb.isAdmin ? fb.unread : 0}
           navPref={navPref}
           setNavPref={setNavPref}
           onDeleted={() => {

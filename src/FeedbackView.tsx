@@ -7,18 +7,16 @@ import {
 
 interface Props {
   isAdmin: boolean
-  onBack: () => void
   onChanged: () => void
 }
 
 const card = 'space-y-3 rounded-xl bg-slate-800 p-4'
 
-export default function FeedbackView({ isAdmin, onBack, onChanged }: Props) {
+export default function FeedbackView({ isAdmin, onChanged }: Props) {
   const [tab, setTab] = useState<'enviar' | 'recebidos'>('enviar')
   return (
     <div className="space-y-4">
       <header className="flex items-center gap-1">
-        <button onClick={onBack} aria-label="Voltar para Conta" className="flex h-11 w-11 items-center justify-center rounded-lg text-xl text-slate-300 hover:bg-slate-800">‹</button>
         <h1 className="text-2xl font-bold">Feedback</h1>
       </header>
       {isAdmin && (

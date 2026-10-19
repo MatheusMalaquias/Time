@@ -15,3 +15,6 @@ export const IconBell = () => (
 export const IconUser = () => (
   <svg {...base}><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
 )
+export const IconChat = () => (
+  <svg {...base}><path d="M4 5h16v11H9l-5 4V5Z" /></svg>
+)
