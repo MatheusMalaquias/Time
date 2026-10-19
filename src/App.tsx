@@ -104,7 +104,7 @@ export default function App() {
     const n = new Date()
     return selected === today ? Math.min(23 * 60, Math.ceil((n.getHours() * 60 + n.getMinutes() + 1) / 30) * 30) : 9 * 60
   }
-  const navBtn = 'flex h-11 w-11 items-center justify-center rounded-lg text-xl text-slate-300 hover:bg-slate-800'
+  const navBtn = 'flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-xl text-slate-300 hover:bg-slate-800'
   const pill = 'rounded-lg bg-slate-800 px-4 py-2.5 text-sm text-sky-400'
 
   // com o Supabase configurado, é preciso entrar para usar o app
@@ -128,10 +128,10 @@ export default function App() {
   }
 
   return (
-    <div className="relative mx-auto flex h-dvh max-w-2xl flex-col">
+    <div className="relative mx-auto flex h-dvh w-full max-w-2xl flex-col overflow-x-hidden">
       <main
         key={view}
-        className={`fade-in min-h-0 flex-1 px-4 ${view === 'dia' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto overscroll-contain pb-6'}`}
+        className={`fade-in min-h-0 min-w-0 flex-1 px-4 ${view === 'dia' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto overscroll-contain pb-6'}`}
         style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
       >
       {(view === 'avisos' || view === 'conta') && <h1 className="mb-4 text-2xl font-bold">{view === 'avisos' ? 'Avisos' : 'Conta'}</h1>}
@@ -159,14 +159,14 @@ export default function App() {
       ) : view === 'mes' ? (
         <>
           <header className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 flex-1 items-center gap-1">
               <button onClick={() => move(-1)} aria-label="Mês anterior" className={navBtn}>‹</button>
-              <h1 className="min-w-40 text-center text-xl font-semibold">
+              <h1 className="min-w-0 flex-1 truncate text-center text-xl font-semibold">
                 {MONTHS[cursor.m]} {cursor.y}
               </h1>
               <button onClick={() => move(1)} aria-label="Próximo mês" className={navBtn}>›</button>
             </div>
-            <div className="flex gap-2">
+            <div className="flex shrink-0 gap-2">
               <button onClick={goToday} className={pill}>Hoje</button>
             </div>
           </header>
@@ -208,9 +208,9 @@ export default function App() {
       ) : (
         <div className="flex min-h-0 flex-1 flex-col" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           <header className="mb-3 flex shrink-0 items-center justify-between gap-2">
-            <div className="flex items-center">
+            <div className="flex min-w-0 flex-1 items-center">
               <button onClick={() => shiftDay(-1)} aria-label="Dia anterior" className={navBtn}>‹</button>
-              <div className="min-w-44 text-center">
+              <div className="min-w-0 flex-1 text-center">
                 <h1 className="text-xl font-semibold first-letter:uppercase">
                   {parseDate(selected).toLocaleDateString('pt-BR', { weekday: 'long' })}
                 </h1>
@@ -220,7 +220,7 @@ export default function App() {
               </div>
               <button onClick={() => shiftDay(1)} aria-label="Próximo dia" className={navBtn}>›</button>
             </div>
-            <div className="flex gap-2">
+            <div className="flex shrink-0 gap-2">
               {selected !== today && <button onClick={goToday} className={pill}>Hoje</button>}
             </div>
           </header>

@@ -2,11 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; width: 100%; overflow-x: hidden; }
 
 body {
   @apply bg-slate-900 text-slate-100 antialiased;
   min-height: 100dvh;
+  width: 100%;
+  overflow-x: hidden; /* a tela nunca rola de lado */
   overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation; /* tira o atraso do toque duplo */
