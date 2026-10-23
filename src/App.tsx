@@ -172,7 +172,7 @@ export default function App() {
 
       <main
         key={view}
-        className={`fade-in min-h-0 min-w-0 flex-1 px-4 ${view === 'dia' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto overscroll-contain pb-6'}`}
+        className={`fade-in min-h-0 min-w-0 flex-1 px-4 ${view === 'dia' || view === 'mes' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto overscroll-contain pb-6'}`}
         style={{
           paddingTop: navTop ? '0.75rem' : 'max(1rem, env(safe-area-inset-top))',
         }}
@@ -209,7 +209,7 @@ export default function App() {
       ) : view === 'avisos' ? (
         <RemindersView items={items} today={today} cfg={remind} setCfg={setRemind} />
       ) : view === 'mes' ? (
-        <div key={`${cursor.y}-${cursor.m}`} className={`min-h-full ${swipe.enterClass}`} style={swipe.style} {...swipe.handlers}>
+        <div key={`${cursor.y}-${cursor.m}`} className={`min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6 ${swipe.enterClass}`} style={{ ...swipe.style, touchAction: 'pan-y' }} {...swipe.handlers}>
           <header className="mb-4 flex items-center justify-between">
             <div className="flex min-w-0 flex-1 items-center gap-1">
               <button onClick={() => move(-1)} aria-label="Mês anterior" className={navBtn}>‹</button>
