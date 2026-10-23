@@ -6,6 +6,7 @@ import ItemSheet from './ItemSheet'
 import AccountView from './AccountView'
 import { IconBell, IconChat, IconDay, IconMonth, IconPanel, IconUser } from './Icons'
 import { Brand } from './Logo'
+import { useSwipe } from './swipe'
 import { clearLocalData, cloudConfigured, useSession, useSync } from './cloud'
 import Welcome from './Welcome'
 import FeedbackView from './FeedbackView'
@@ -92,21 +93,11 @@ export default function App() {
   const doneCount = dayItems.filter((i) => i.doneOn.includes(selected)).length
   const untimed = dayItems.filter((i) => i.start === undefined)
 
-  // deslizar para o lado troca de dia (ignora gestos que começam em uma atividade)
-  const swipe = useRef<{ x: number; y: number; ok: boolean } | null>(null)
-  const onTouchStart = (e: React.TouchEvent) => {
-    const t = e.touches[0]
-    swipe.current = { x: t.clientX, y: t.clientY, ok: !(e.target as HTMLElement).closest('[data-event]') }
-  }
-  const onTouchEnd = (e: React.TouchEvent) => {
-    const s0 = swipe.current
-    swipe.current = null
-    if (!s0?.ok) return
-    const t = e.changedTouches[0]
-    const dx = t.clientX - s0.x
-    const dy = t.clientY - s0.y
-    if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 2) shiftDay(dx < 0 ? 1 : -1)
-  }
+  // arrastar de lado troca o dia (aba Dia) ou o mês (aba Mês); o conteúdo acompanha o dedo
+  const swipe = useSwipe(
+    () => (view === 'mes' ? move(1) : shiftDay(1)),
+    () => (view === 'mes' ? move(-1) : shiftDay(-1))
+  )
   const suggestStart = () => {
     const n = new Date()
     return selected === today ? Math.min(23 * 60, Math.ceil((n.getHours() * 60 + n.getMinutes() + 1) / 30) * 30) : 9 * 60
@@ -218,7 +209,7 @@ export default function App() {
       ) : view === 'avisos' ? (
         <RemindersView items={items} today={today} cfg={remind} setCfg={setRemind} />
       ) : view === 'mes' ? (
-        <>
+        <div key={`${cursor.y}-${cursor.m}`} className={`min-h-full ${swipe.enterClass}`} style={swipe.style} {...swipe.handlers}>
           <header className="mb-4 flex items-center justify-between">
             <div className="flex min-w-0 flex-1 items-center gap-1">
               <button onClick={() => move(-1)} aria-label="Mês anterior" className={navBtn}>‹</button>
@@ -264,10 +255,10 @@ export default function App() {
               )
             })}
           </div>
-          <p className="mt-3 text-center text-xs text-slate-500">Toque em um dia para abrir.</p>
-        </>
+          <p className="mt-3 text-center text-xs text-slate-500">Toque em um dia para abrir. Arraste de lado para trocar de mês.</p>
+        </div>
       ) : (
-        <div className="flex min-h-0 flex-1 flex-col" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <div key={selected} className={`flex min-h-0 flex-1 flex-col ${swipe.enterClass}`} style={swipe.style} {...swipe.handlers}>
           <header className="mb-3 flex shrink-0 items-center justify-between gap-2">
             <div className="flex min-w-0 flex-1 items-center">
               <button onClick={() => shiftDay(-1)} aria-label="Dia anterior" className={navBtn}>‹</button>

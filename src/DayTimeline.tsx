@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { dragState } from './swipe'
 import { colorFor, DEFAULT_MINUTES, fmt, layoutDay, type Item } from './calendar'
 
 const HOUR_H = 56
@@ -57,6 +58,7 @@ export default function DayTimeline({ date, items, isToday, onToggle, onEdit, on
     const el = e.currentTarget
     const pointerId = e.pointerId
     const startY = e.clientY
+    const startX = e.clientX
     const origStart = item.start as number
     const maxStart = 24 * 60 - (item.end !== undefined ? item.end - origStart : DEFAULT_MINUTES)
     const touch = e.pointerType === 'touch'
@@ -67,6 +69,7 @@ export default function DayTimeline({ date, items, isToday, onToggle, onEdit, on
     const block = (ev: TouchEvent) => ev.preventDefault() // impede a página de rolar durante o arrasto
     const begin = () => {
       dragging = true
+      dragState.active = true
       navigator.vibrate?.(12)
       el.setPointerCapture?.(pointerId)
       window.addEventListener('touchmove', block, { passive: false })
@@ -82,6 +85,8 @@ export default function DayTimeline({ date, items, isToday, onToggle, onEdit, on
     const move = (ev: PointerEvent) => {
       const dy = ev.clientY - startY
       if (!dragging) {
+        // dedo andando de lado antes de segurar: é gesto de trocar de dia, não de mover a atividade
+        if (touch && Math.abs(ev.clientX - startX) >= 8) return cleanup()
         if (Math.abs(dy) < MOVE_PX) return
         if (touch) return cleanup() // moveu antes de segurar: é rolagem, não arrasto
         begin()
@@ -93,11 +98,17 @@ export default function DayTimeline({ date, items, isToday, onToggle, onEdit, on
     const up = () => {
       cleanup()
       if (!dragging) return onEdit(item) // toque/clique simples abre a edição
+      dragState.active = false
+      dragState.endedAt = Date.now()
       setDrag(null)
       if (latest !== origStart) onMove(item, latest)
     }
     const cancel = () => {
       cleanup()
+      if (dragging) {
+        dragState.active = false
+        dragState.endedAt = Date.now()
+      }
       setDrag(null)
     }
 

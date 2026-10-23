@@ -39,3 +39,12 @@ button:active:not(:disabled) { transform: scale(0.96); }
 
 /* campos de seleção de texto só onde faz sentido; evita seleção acidental ao arrastar */
 button, nav { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+/* troca de dia ou mês: o novo conteúdo entra deslizando do lado do gesto */
+@keyframes slide-from-right { from { transform: translateX(28%); opacity: 0.2 } to { transform: none; opacity: 1 } }
+@keyframes slide-from-left { from { transform: translateX(-28%); opacity: 0.2 } to { transform: none; opacity: 1 } }
+.slide-from-right { animation: slide-from-right 240ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.slide-from-left { animation: slide-from-left 240ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .slide-from-right, .slide-from-left { animation: none; }
+}
